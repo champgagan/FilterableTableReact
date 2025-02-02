@@ -1,35 +1,28 @@
 import "./App.css";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useEffect } from "react";
 import FilterableTable from "./components/FilterableTable";
+import useFetch from "./hooks/useFetch";
 
 function App() {
-  const [userdata, setUserData] = useState([]);
-  const [err, setErr] = useState(false);
+  const URL = process.env.REACT_APP_USER_API;
+  const { data, loading, error, fetchData } = useFetch(URL);
 
   const renderElse = () => {
-    if (err) {
+    if (error) {
       return "Something went wrong with the API";
     } else {
-      return "loading... please make sure node api is up and running at localhost";
+      return "";
     }
   };
 
   useEffect(() => {
-    async function fetchusers() {
-      const { data } = await axios.get(process.env.REACT_APP_USER_API);
-      if (data.success) {
-        setUserData(data.data);
-      } else {
-        setErr(true);
-      }
-    }
-    fetchusers();
+    fetchData();
   }, []);
 
   return (
     <div className="App">
-      {!err ? <FilterableTable userdata={userdata} /> : renderElse()}
+      {loading && <p>Fetching data from the network</p>}
+      {!error ? <FilterableTable userdata={data} /> : renderElse()}
     </div>
   );
 }
